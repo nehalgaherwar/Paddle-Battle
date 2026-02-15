@@ -1,0 +1,124 @@
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const paddleWidth = 10;
+const paddleHeight = 100;
+const ballSize = 10;
+
+let player1 = {
+    x: 10,
+    y: canvas.height/2 - paddleHeight/2,
+    score: 0
+};
+
+let player2 = {
+    x: canvas.width - 20,
+    y: canvas.height/2 - paddleHeight/2,
+    score: 0
+};
+
+let ball = {
+    x: canvas.width/2,
+    y: canvas.height/2,
+    speedX: 5,
+    speedY: 5
+};
+
+function drawRect(x,y,w,h){
+    ctx.fillStyle = "white";
+    ctx.fillRect(x,y,w,h);
+}
+
+function drawBall(x,y,r){
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+}
+
+function drawText(text,x,y){
+    ctx.fillStyle = "white";
+    ctx.font = "30px Arial";
+    ctx.fillText(text,x,y);
+}
+
+function resetBall(){
+    ball.x = canvas.width/2;
+    ball.y = canvas.height/2;
+    ball.speedX = -ball.speedX;
+}
+
+function update(){
+    ball.x += ball.speedX;
+    ball.y += ball.speedY;
+
+    if(ball.y + ballSize > canvas.height || ball.y - ballSize < 0){
+        ball.speedY = -ball.speedY;
+    }
+
+    if(ball.x - ballSize < player1.x + paddleWidth &&
+       ball.y > player1.y &&
+       ball.y < player1.y + paddleHeight){
+        ball.speedX = -ball.speedX;
+    }
+
+    if(ball.x + ballSize > player2.x &&
+       ball.y > player2.y &&
+       ball.y < player2.y + paddleHeight){
+        ball.speedX = -ball.speedX;
+    }
+
+    if(ball.x < 0){
+        player2.score++;
+        resetBall();
+    }
+
+    if(ball.x > canvas.width){
+        player1.score++;
+        resetBall();
+    }
+
+    if(player1.score === 5){
+        alert("Player 1 Wins!");
+        location.reload();
+    }
+
+    if(player2.score === 5){
+        alert("Player 2 Wins!");
+        location.reload();
+    }
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawRect(player1.x, player1.y, paddleWidth, paddleHeight);
+    drawRect(player2.x, player2.y, paddleWidth, paddleHeight);
+
+    drawBall(ball.x, ball.y, ballSize);
+
+    drawText(player1.score, canvas.width/4, 50);
+    drawText(player2.score, canvas.width*3/4, 50);
+}
+
+function gameLoop(){
+    update();
+    draw();
+}
+
+setInterval(gameLoop, 1000/60);
+
+document.addEventListener("keydown", function(e){
+    if(e.key === "w" && player1.y > 0){
+        player1.y -= 20;
+    }
+    if(e.key === "s" && player1.y < canvas.height - paddleHeight){
+        player1.y += 20;
+    }
+    if(e.key === "ArrowUp" && player2.y > 0){
+        player2.y -= 20;
+    }
+    if(e.key === "ArrowDown" && player2.y < canvas.height - paddleHeight){
+        player2.y += 20;
+    }
+});
